@@ -1,41 +1,34 @@
 <?php
-    /* Get request returns url's content*/
     require_once 'simple_html_dom.php';
+    require_once 'cors.php';
+    require_once 'colorUtil.php';
 
-    function findColors($content){
-        $pattern = '/(#([0-9a-f]{3}){1,2}|(rgba|hsla)\(\d{1,3}%?(,\s?\d{1,3}%?){2},\s?(1|0|0?\.\d+)\)|(rgb|hsl)\(\d{1,3}%?(,\s?\d{1,3}%?){2}\))/i';
-
-        preg_match_all($pattern, $content, $matches);
-        return $matches;
-    }
-    function filterColors($colors){
-        $colors = array_filter($colors); 
-        $colors = array_unique($colors); 
-        
-        return $colors;
-    }
+    allow_cors();
 
     $url = $_GET['url'];
-    $file = @file_get_html($url);
+    $index = @file_get_html($url);
 
-    if(!$file)
-        echo 'URL Error!';
+    $result = new stdClass();
+    $result->status = 'ok';
+    $result->colors = []; 
+
+    if(!$index)
+        $result->status = 'error';
     else{
-        $colors = [];
+        $colors = find_colors($index);
+        $result->colors = array_merge($colors);
 
-        $colors = call_user_func_array("array_merge", findColors($file));
+        foreach ($index->find('link[type="text/css"]') as $css_links){
+            $link = $css_links->href;
+            $content = @file_get_html($link);
 
-        foreach ($file->find('link[type="text/css"]') as $stylesheet){
-            $stylesheet_url = $stylesheet->href;
-            $newFile = @file_get_html($stylesheet_url);
-
-            if(!$newFile)
-                echo 'URL Error!';
-            else
-            $colors = call_user_func_array("array_merge", findColors($newFile));
+            if($content){
+                $colors = find_colors($content);
+                $result->colors = array_merge($colors);
+            }
         }    
-        $colors = filterColors($colors);
-        echo json_encode($colors);
+        $result->colors = filter_colors($result->colors);
     }
-    
+    echo json_encode($result);    
+
 ?>
