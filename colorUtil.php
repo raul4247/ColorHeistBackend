@@ -10,6 +10,20 @@ function find_colors($content){
 function filter_colors($colors){
     // remove empty items
     $colors = array_filter($colors); 
+
+    // Filtering color possibilities
+    
+    foreach ($colors as &$color) {
+        // HEX value, size 6
+        if($color[0] == '#' && strlen($color) == 7)
+            $color = strtoupper($color);
+        // HEX value, size 3
+        if($color[0] == '#' && strlen($color) == 4)
+            $color = strtoupper('#' . $color[1] . $color[1] . $color[2] . $color[2] . $color[3] . $color[3]);
+
+        //HSL values, RGBA values, and HSLA values
+    }
+
     // remove repeated items
     $colors = array_keys(array_flip($colors));
 
