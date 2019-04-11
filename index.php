@@ -10,6 +10,7 @@
 
     $result = new stdClass();
     $result->status = 'ok';
+    $result->title  = $index->find('title',0)->innertext;
     $result->colors = []; 
 
     if(!$index)
