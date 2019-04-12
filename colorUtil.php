@@ -69,4 +69,12 @@ function RGB_to_HEX($color) {
 	return strtoupper("#$a$r$g$b");
 }
 
+function filter_size6($value){
+    return sizeof($value) == 6;
+}
+
+function filter_size8($value){
+    return sizeof($value) == 8;
+}
+
 ?>

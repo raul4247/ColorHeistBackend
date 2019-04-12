@@ -11,13 +11,14 @@
     $result = new stdClass();
     $result->status = 'ok';
     $result->title  = $index->find('title',0)->innertext;
-    $result->colors = []; 
+    $colors_arr = []; 
+
 
     if(!$index)
         $result->status = 'error';
     else{
         $colors = find_colors($index);
-        $result->colors = array_merge($colors);
+        $colors_arr = array_merge($colors);
 
         foreach ($index->find('link[type="text/css"]') as $css_links){
             $link = $css_links->href;
@@ -25,10 +26,22 @@
 
             if($content){
                 $colors = find_colors($content);
-                $result->colors = array_merge($colors);
+                $colors_arr = array_merge($colors);
             }
-        }    
-        $result->colors = filter_colors($result->colors);
+        }
+
+        $colors_arr = filter_colors($colors_arr);
+
+        $result->rgb_colors = array_filter($colors_arr, function($color) {
+            return strlen($color) == 7;
+        });
+        $result->rgb_colors = array_values($result->rgb_colors);
+
+        $result->rgba_colors = array_filter($colors_arr, function($color) {
+            return strlen($color) == 9;
+        });
+        $result->rgba_colors = array_values($result->rgba_colors);
+        
     }
     echo json_encode($result);    
 
