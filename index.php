@@ -5,6 +5,11 @@
 
     allow_cors();
 
+    function fix_path($rel, $base){
+        if(substr($rel, 0, 2) == "//")
+            return (parse_url($base)['scheme'] . ':' . $rel);
+    }
+
     $url = $_GET['url'];
     $index = @file_get_html($url);
 
@@ -20,13 +25,16 @@
         $colors = find_colors($index);
         $colors_arr = array_merge($colors);
 
-        foreach ($index->find('link[type="text/css"]') as $css_links){
-            $link = $css_links->href;
-            $content = @file_get_html($link);
 
-            if($content){
-                $colors = find_colors($content);
-                $colors_arr = array_merge($colors);
+        $css_links = preg_match_all('/"([^"]+?\.css)"/', $index, $matches);
+        if ($css_links !== FALSE && $css_links > 0){
+            foreach ($matches[1] as $link){
+                $content = @file_get_html(fix_path($link, $url));
+
+                if($content){
+                    $colors = find_colors($content);
+                    $colors_arr = array_merge($colors);
+                }
             }
         }
 
