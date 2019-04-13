@@ -15,13 +15,13 @@
 
     $result = new stdClass();
     $result->status = 'ok';
-    $result->title  = $index->find('title',0)->innertext;
     $colors_arr = []; 
 
 
     if(!$index)
         $result->status = 'error';
     else{
+        $result->title  = $index->find('title',0)->innertext;
         $colors = find_colors($index);
         $colors_arr = array_merge($colors);
 
@@ -33,8 +33,9 @@
 
                 if($content){
                     $colors = find_colors($content);
-                    $colors_arr = array_merge($colors);
+                    $colors_arr = array_merge($colors_arr, $colors);
                 }
+                $colors_arr = filter_colors($colors_arr);
             }
         }
 
