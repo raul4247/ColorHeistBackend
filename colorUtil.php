@@ -27,10 +27,12 @@ function filter_colors($colors){
             if(strlen($c)!=0)
     			$color = $c;
         }
-        //HSL values
-
-		//HSLA values
-
+        //HSL and HSLA values
+		if(substr($color, 0, 3) == 'hsl'){
+            $c = HSL_to_HEX($color);
+            if(strlen($c)!=0)
+    			$color = $c;
+        }
     }
 
     // remove repeated items
@@ -46,10 +48,8 @@ function RGB_to_HEX($color) {
     if(strlen($color) < 11)
         return "";
 
-    if(preg_match_all('#\((([^()]+|(?R))*)\)#', $color ,$matches))
-    	$rgba = explode(',', implode(' ', $matches[1]));
-    else
-		$rgba = explode(',', $color);
+    preg_match_all('#\((([^()]+|(?R))*)\)#', $color ,$matches);
+    $rgba = explode(',', implode(' ', $matches[1]));
 
 
     $r = dechex($rgba[0]);
@@ -73,6 +73,71 @@ function RGB_to_HEX($color) {
         $a = '0' . $a;
 
 	return strtoupper("#$a$r$g$b");
+}
+
+function HSL_to_HEX ($color) {
+	$hsl = [];
+
+    preg_match_all('#\((([^()]+|(?R))*)\)#', $color ,$matches);
+    $hsl = explode(',', implode(' ', $matches[1]));
+
+    $h = str_replace('%', '', $hsl[0]);
+    $s = str_replace('%', '', $hsl[1]);
+    $l = str_replace('%', '', $hsl[2]);
+
+    if(sizeof($hsl) == 4)
+        $a = $hsl[3];
+
+    $h /= 60;
+    if ($h < 0) $h = 6 - fmod(-$h, 6);
+    $h = fmod($h, 6);
+
+    $s = max(0, min(1, $s / 100));
+    $l = max(0, min(1, $l / 100));
+
+    $c = (1 - abs((2 * $l) - 1)) * $s;
+    $x = $c * (1 - abs(fmod($h, 2) - 1));
+
+    if ($h < 1) {
+        $r = $c;
+        $g = $x;
+        $b = 0;
+    } 
+    elseif ($h < 2) {
+        $r = $x;
+        $g = $c;
+        $b = 0;
+    } 
+    elseif ($h < 3) {
+        $r = 0;
+        $g = $c;
+        $b = $x;
+    } 
+    elseif ($h < 4) {
+        $r = 0;
+        $g = $x;
+        $b = $c;
+    } 
+    elseif ($h < 5) {
+        $r = $x;
+        $g = 0;
+        $b = $c;
+    }
+    else {
+        $r = $c;
+        $g = 0;
+        $b = $x;
+    }
+
+    $m = $l - $c / 2;
+    $r = round(($r + $m) * 255);
+    $g = round(($g + $m) * 255);
+    $b = round(($b + $m) * 255);
+
+    if(sizeof($hsl) == 3)
+        return RGB_to_HEX("rgb($r, $g, $b)");
+    else if(sizeof($hsl) == 4)
+        return RGB_to_HEX("rgba($r, $g, $b, $a)");
 }
 
 function filter_size6($value){
