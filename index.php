@@ -15,7 +15,11 @@
 
     $result = new stdClass();
     $result->status = 'ok';
-    $colors_arr = []; 
+    $result->status = 'ok';
+    $result->status = 'ok';
+    $result->title  = '';
+    $result->rgb_colors = [];
+    $result->rgba_colors = [];
 
 
     if(!$index)
@@ -28,6 +32,7 @@
 
         $css_links = preg_match_all('/"([^"]+?\.css)"/', $index, $matches);
         if ($css_links !== FALSE && $css_links > 0){
+            $links = call_user_func_array('array_merge', $matches);
             foreach ($matches[1] as $link){
                 $content = @file_get_html(fix_path($link, $url));
 
